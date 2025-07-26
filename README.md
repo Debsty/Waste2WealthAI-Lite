@@ -1,15 +1,22 @@
-# Waste2WealthAI-Lite
+# ♻️ Waste2Wealth AI Lite
 
-A demo web app that uses AI and OCR to classify waste items and estimate their recycling value. Built using Streamlit.
+A lightweight AI-powered Streamlit web app to:
+- Classify waste (e.g., plastic bottles)
+- Extract text from uploaded images using a cloud-based OCR API
 
-## Features
-- Image-based waste classification (simulated with Teachable Machine output)
-- OCR extraction using pytesseract
-- Recyclable value estimation
-- Visualization dashboard
+---
 
-## How to Run Locally
+## 🚀 Features
+
+- Upload `.jpg`, `.jpeg`, or `.png` waste images
+- Simulated classification with sample value output
+- Real-time OCR using [OCR.Space](https://ocr.space/OCRAPI)
+- Compatible with **Streamlit Cloud** (no Tesseract required)
+
+---
+
+## 📦 Installation
 
 ```bash
 pip install -r requirements.txt
-streamlit run ai_app.py
+streamlit run Waste2Wealth_ai_app.py
