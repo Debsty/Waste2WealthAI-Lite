@@ -1,42 +1,46 @@
 import streamlit as st
-import numpy as np
 from PIL import Image
-import pytesseract
-import plotly.express as px
-import time
+import requests
+import io
 
-st.set_page_config(page_title="Waste2WealthAI Lite", layout="centered")
+st.set_page_config(page_title="Waste2Wealth AI Lite", layout="centered")
 
-st.title("♻️ Waste2WealthAI Lite")
-st.subheader("A lightweight waste classification and OCR demo using AI")
+st.title("♻️ Waste2Wealth AI Lite")
+st.subheader("Extract Waste Type and Text from Uploaded Image")
 
-uploaded_file = st.file_uploader("Upload a waste image", type=["jpg", "png", "jpeg"])
-if uploaded_file:
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+
+def extract_text_from_image(img):
+    buffered = io.BytesIO()
+    img.save(buffered, format="JPEG")
+    img_bytes = buffered.getvalue()
+
+    response = requests.post(
+        "https://api.ocr.space/parse/image",
+        files={"filename": img_bytes},
+        data={
+            "apikey": "helloworld",  # Replace with your OCR.Space API key
+            "language": "eng",
+        },
+    )
+
+    result = response.json()
+    if result.get("IsErroredOnProcessing"):
+        return "OCR failed: " + result.get("ErrorMessage", ["Unknown error"])[0]
+    return result["ParsedResults"][0]["ParsedText"]
+
+if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    image = image.copy()  # Prevent cached image reuse
 
-    st.info("Analyzing Image...")
-    time.sleep(2)
+    st.image(image, caption="Uploaded Image", use_container_width=True)
 
-    # --- Simulated AI Prediction ---
-    predicted_class = "Plastic Bottle"
-    estimated_value = "₦15.00"
+    st.markdown("### 🧠 Predicted Class: Plastic Bottle")
+    st.markdown("### 💰 Estimated Value: ₦15.00")
 
-    st.success(f"🧠 Predicted Class: {predicted_class}")
-    st.success(f"💰 Estimated Value: {estimated_value}")
+    st.markdown("### 🔍 Extracted Text (OCR)")
+    text = extract_text_from_image(image)
+    st.text(text if text.strip() else "No text found.")
 
-    # --- OCR Extraction ---
-    st.subheader("🔍 Extracted Text (OCR)")
-    text = pytesseract.image_to_string(image)
-    st.code(text or "No text found.")
-
-    # --- Visualization ---
-    st.subheader("📊 Impact Visualization (Simulated)")
-    data = {
-        "Category": ["Plastic", "Glass", "Paper", "Metal"],
-        "Weight (kg)": [2.4, 1.2, 0.5, 3.0],
-        "Value (₦)": [120, 80, 25, 150]
-    }
-
-    fig = px.bar(data, x="Category", y="Value (₦)", color="Category", title="Recyclable Waste Value")
-    st.plotly_chart(fig)
+st.markdown("---")
+st.caption("Powered by OCR.Space API + Streamlit")
